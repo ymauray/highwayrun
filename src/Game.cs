@@ -312,7 +312,7 @@ sealed class Game : IDisposable
         // un peu de direction même à très basse vitesse, pour pouvoir se dégager d'un obstacle
         float dx = dt * 2.2f * MathF.Min(1f, sp * 1.25f + (speed > 0 || acc ? 0.2f : 0));
         float startPos = position;
-        position = MathF.Min(position + speed * dt, track.Length - Seg * (Cfg.DrawDistance + 4));
+        position = MathF.Min(position + speed * dt, track.Length - Seg * 30);
 
         if (crashT <= 0)
         {
@@ -565,7 +565,7 @@ sealed class Game : IDisposable
         {
             var th = track.Find(position + Cfg.PlayerZ).Theme;
             spawnDist = Seg * (14 + rng.Next(22)) / th.Traffic;
-            SpawnCar(position + Seg * (Cfg.DrawDistance - 8));
+            SpawnCar(position + Seg * Cfg.TrafficHorizon);
         }
     }
 
@@ -600,7 +600,7 @@ sealed class Game : IDisposable
         Parallax(seg, (position - startPos) / Seg);
         offroad = false;
         skid = 0;
-        if (position > track.Length - (Cfg.DrawDistance + 30) * Seg)
+        if (position > track.Length - (Cfg.ForkTail + 30) * Seg)
         {
             position = 0;
             playerX = 0;

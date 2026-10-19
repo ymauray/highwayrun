@@ -11,7 +11,12 @@ static class Cfg
     public const int Lanes = 3;
     public const int RumbleLength = 3;
     public const float CameraHeight = 1000f;
-    public const int DrawDistance = 220;
+    // Aussi loin que la route reste plus large qu'un pixel ; le brouillard estompe le lointain.
+    public const int DrawDistance = 1000;
+    // Les voitures apparaissent à cette distance (en segments), pas à l'horizon.
+    public const int TrafficHorizon = 300;
+    // Longueur de la fourche après le choix : son extrémité doit rester noyée dans le brouillard.
+    public const int ForkTail = DrawDistance * 6 / 10;
     public const float FieldOfView = 100f;
     public static readonly float CameraDepth = 1f / MathF.Tan(FieldOfView / 2f * MathF.PI / 180f);
     public static readonly float PlayerZ = CameraHeight * CameraDepth;

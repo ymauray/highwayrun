@@ -242,7 +242,7 @@ sealed class Track
         Segs[^1].Decision = true;
 
         var rowL = U.Pick(rng, theme.Rows);
-        for (int k = 0; k < 270; k++)
+        for (int k = 0; k < Cfg.ForkTail; k++)
         {
             var seg = Add(0, y);
             seg.Dual = true;
@@ -259,7 +259,7 @@ sealed class Track
     void BuildGoal()
     {
         int g0 = Segs.Count;
-        Straight(420);
+        Straight(Cfg.DrawDistance + 80);
         Segs[g0 + 30].Goal = true;
         PutGate(g0 + 30, Art.GateGoal);
         for (int i = g0 + 20; i < g0 + 50; i += 3) { Put(i, Art.Crowd, -1.25f); Put(i, Art.Crowd, 1.25f); }

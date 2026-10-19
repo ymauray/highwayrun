@@ -109,8 +109,10 @@ sealed class Renderer
     {
         var fogCol = s.Theme.Fog;
         float y1 = s.P1.Y, y2 = s.P2.Y;
-        float gy = MathF.Max(0, MathF.Floor(y2)), gh = MathF.Min(H, MathF.Ceiling(y1)) - gy + 1;
-        if (gh > 0) Raylib.DrawRectangle(0, (int)gy, W, (int)gh, U.Mix(s.Grass, fogCol, s.Fog));
+        // Bande d'herbe aux bornes exactes (non arrondies) : au loin, plusieurs segments partagent
+        // une même ligne de pixels, et une bande élargie effacerait l'asphalte des segments plus lointains.
+        float gy = MathF.Max(0, y2), gh = MathF.Min(H, y1) - gy;
+        if (gh > 0) Raylib.DrawRectangleRec(new Rectangle(0, gy, W, gh), U.Mix(s.Grass, fogCol, s.Fog));
 
         int roads = s.Dual ? 2 : 1;
         Span<float> c1 = [s.A1, s.B1], c2 = [s.A2, s.B2], fog = [s.Fog, s.Fog];

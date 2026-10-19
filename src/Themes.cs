@@ -17,7 +17,7 @@ sealed class StageTheme
     public Color Far, Near, Water = Hex(0x2E7FD0);
     public Color CloudTint = Color.White;
     public Backdrop Backdrop;
-    public float FogDensity = 4f;
+    public float FogDensity = 3f;
     public bool Sun, Clouds = true;
     public float Curviness = 0.5f, Hilliness = 0.5f, Traffic = 0.6f, Scatter = 0.12f;
     public (SpriteDef def, float weight)[] Rows = [];
@@ -42,7 +42,7 @@ static class Themes
         {
             Name = "COCONUT BEACH", SkyTop = Hex(0x1C6FE8), SkyBottom = Hex(0xA6DDFF), Fog = Hex(0xC4E8FF),
             Grass1 = Hex(0xF0DCA4), Grass2 = Hex(0xE6CF92), Far = Hex(0x5A8CB8), Near = Hex(0xD8C088), Water = Hex(0x2C86D8),
-            Backdrop = Backdrop.Sea, FogDensity = 3, Curviness = 0.35f, Hilliness = 0.25f, Traffic = 0.55f,
+            Backdrop = Backdrop.Sea, FogDensity = 2.5f, Curviness = 0.35f, Hilliness = 0.25f, Traffic = 0.55f,
             Rows = [(Art.Palm, 4), (Art.PalmBent, 3)],
             Props = [(Art.Bush, 2), (Art.Umbrella, 2), (Art.Palm, 1)], Billboards = bb,
         };
@@ -80,7 +80,7 @@ static class Themes
         };
         var cloudy = new StageTheme
         {
-            Name = "CLOUDY MOUNTAIN", SkyTop = Hex(0x7E8C9C), SkyBottom = Hex(0xCAD2DA), Fog = Hex(0xC4CCD4), FogDensity = 9,
+            Name = "CLOUDY MOUNTAIN", SkyTop = Hex(0x7E8C9C), SkyBottom = Hex(0xCAD2DA), Fog = Hex(0xC4CCD4), FogDensity = 6.5f,
             Grass1 = Hex(0x4F7A4A), Grass2 = Hex(0x47703F), Far = Hex(0x6F7F8F), Near = Hex(0x4A5E52), CloudTint = Hex(0xB8C0C8),
             Backdrop = Backdrop.Mountains, Curviness = 0.95f, Hilliness = 0.7f, Traffic = 0.45f,
             Rows = [(Art.Pine, 5)],
@@ -136,7 +136,7 @@ static class Themes
         };
         var desolation = new StageTheme
         {
-            Name = "DESOLATION HILL", SkyTop = Hex(0x50607A), SkyBottom = Hex(0xB8A898), Fog = Hex(0xB0A49C), FogDensity = 6,
+            Name = "DESOLATION HILL", SkyTop = Hex(0x50607A), SkyBottom = Hex(0xB8A898), Fog = Hex(0xB0A49C), FogDensity = 4.5f,
             Grass1 = Hex(0x7C786C), Grass2 = Hex(0x747066), Far = Hex(0x5C5C6C), Near = Hex(0x4C4A48), CloudTint = Hex(0xA0A0A8),
             Backdrop = Backdrop.Mountains, Curviness = 0.7f, Hilliness = 0.8f, Traffic = 0.4f,
             Rows = [(Art.Column, 3), (Art.DeadTree, 2)],
