@@ -1,6 +1,7 @@
 # HighwayRun
 
 [![Build](https://github.com/ymauray/highwayrun/actions/workflows/build.yml/badge.svg)](https://github.com/ymauray/highwayrun/actions/workflows/build.yml)
+[![repocheck](https://img.shields.io/badge/repocheck%201.3.0-100%2F100-brightgreen)](https://github.com/ymauray/repocheck)
 
 ![Écran d'accueil de HighwayRun](docs/screenshot-title.png)
 
