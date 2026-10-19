@@ -159,7 +159,7 @@ sealed class Track
             double r = rng.NextDouble();
             float mag = mags[Math.Min(4, (int)(rng.NextDouble() * (1.6 + cv * 4.4)))];
             float dir = rng.Next(2) == 0 ? -1 : 1;
-            float Height() => rng.NextDouble() < 0.35 ? 0 : (float)(rng.NextDouble() * 2 - 1) * 55 * hl - LastY / Cfg.SegmentLength * 0.35f;
+            float Height() => rng.NextDouble() < 0.35 ? 0 : (float)(rng.NextDouble() * 2 - 1) * 38 * hl - LastY / Cfg.SegmentLength * 0.35f;
             if (r < 0.2)
                 AddRoad(15 + rng.Next(25), 20 + rng.Next(50), 15 + rng.Next(25), 0, Height());
             else if (r < 0.75)
