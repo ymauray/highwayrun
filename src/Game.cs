@@ -65,6 +65,9 @@ sealed class Game : IDisposable
         target = Raylib.LoadRenderTexture(W * Cfg.ArtScale, H * Cfg.ArtScale);
         Raylib.SetTextureFilter(target.Texture, TextureFilter.Point);
         best = LoadBest();
+        Settings.Load();
+        audio.MusicVolume = Settings.Music;
+        audio.SfxVolume = Settings.Sfx;
         GoTitle();
     }
 
@@ -179,10 +182,12 @@ sealed class Game : IDisposable
 
     void HandleInput()
     {
+        if (options) { HandleOptions(); return; }
         switch (state)
         {
             case State.Title:
                 if (Input.Back) QuitRequested = true;
+                else if (Input.Options) OpenOptions();
                 else if (Input.Left || Input.Right) { automatic = !automatic; audio.PlayBeep(660, 0.05f); }
                 else if (Input.Confirm)
                 {
@@ -208,6 +213,7 @@ sealed class Game : IDisposable
                 if (paused)
                 {
                     if (Input.Pause) paused = false;
+                    else if (Input.Options) OpenOptions();
                     else if (Input.Quit) GoTitle();
                 }
                 else if (Input.Pause) paused = true;
@@ -224,6 +230,74 @@ sealed class Game : IDisposable
                 if (stateT > 1 && (Input.Confirm || Input.Back)) GoTitle();
                 break;
         }
+    }
+
+    // ================================================================== écran des options (volumes)
+
+    bool options, optionsMusic;
+    int optionSel;
+    const int OptionCount = 3;  // musique, bruitages, retour
+
+    void OpenOptions()
+    {
+        options = true;
+        optionSel = 0;
+        // sur l'écran titre aucune musique ne joue : on lance la station choisie pour entendre le réglage
+        if (audio.Music.Current == null) { audio.Music.Play(Songs.All[radio]); optionsMusic = true; }
+    }
+
+    void CloseOptions()
+    {
+        options = false;
+        Settings.Save();
+        if (optionsMusic) { audio.Music.Stop(); optionsMusic = false; }
+    }
+
+    void HandleOptions()
+    {
+        if (Input.Back || Input.Options) CloseOptions();
+        else if (Input.Up) optionSel = (optionSel + OptionCount - 1) % OptionCount;
+        else if (Input.Down) optionSel = (optionSel + 1) % OptionCount;
+        else if ((Input.Left || Input.Right) && optionSel < 2)
+        {
+            float step = Input.Right ? 0.1f : -0.1f;
+            if (optionSel == 0) audio.MusicVolume = Settings.Music = Math.Clamp(MathF.Round((Settings.Music + step) * 10) / 10, 0, 1);
+            else
+            {
+                audio.SfxVolume = Settings.Sfx = Math.Clamp(MathF.Round((Settings.Sfx + step) * 10) / 10, 0, 1);
+                audio.PlayBeep(880, 0.08f);
+            }
+        }
+        else if (Input.Confirm && optionSel == 2) CloseOptions();
+    }
+
+    void DrawOptions()
+    {
+        Raylib.DrawRectangle(0, 0, W, H, Fade(Color.Black, 0.6f));
+        var panel = new Rectangle(100, 58, 280, 156);
+        Raylib.DrawRectangleRounded(panel, 0.08f, 8, Hex(0x181820, 252));
+        Raylib.DrawRectangleRoundedLinesEx(panel, 0.08f, 8, 2, Hex(0x606078));
+        Hud.TextC("OPTIONS", W / 2f, 68, 20, Hex(0xFFD030));
+
+        (string label, float value)[] rows = [("MUSIC", Settings.Music), ("SFX", Settings.Sfx)];
+        for (int i = 0; i < rows.Length; i++)
+        {
+            float y = 106 + i * 28;
+            bool sel = optionSel == i;
+            Color c = sel ? Color.White : Hex(0x8888A0);
+            if (sel) Hud.Text(">", 114, y, 10, Hex(0xFF5050));
+            Hud.Text(rows[i].label, 126, y, 10, c);
+            int filled = (int)MathF.Round(rows[i].value * 10);
+            for (int k = 0; k < 10; k++)
+            {
+                Color seg = k < 7 ? Hex(0x40E060) : k < 9 ? Hex(0xF0E040) : Hex(0xF04040);
+                Raylib.DrawRectangle(186 + k * 13, (int)y, 11, 9, k < filled ? (sel ? seg : Shade(seg, 0.7f)) : Hex(0x303040));
+            }
+            Hud.MonoR($"{filled * 10}%", 366, y, 10, c);
+        }
+        bool back = optionSel == 2;
+        Hud.TextC(back ? "> BACK <" : "BACK", W / 2f, 166, 10, back ? Color.White : Hex(0x8888A0));
+        Hud.TextC("UP / DOWN SELECT     LEFT / RIGHT ADJUST     ESC BACK", W / 2f, 194, 10, Hex(0xC0C0D0));
     }
 
     void Update(float dt)
@@ -659,6 +733,7 @@ sealed class Game : IDisposable
                 break;
         }
         if (paused) DrawPause();
+        if (options) DrawOptions();
         Raylib.EndMode2D();
         Raylib.EndTextureMode();
     }
@@ -778,7 +853,7 @@ sealed class Game : IDisposable
         if ((int)(globalT * 2) % 2 == 0) Hud.Bold("PRESS ENTER", W / 2f, 160, 20, Hex(0xFFFFFF), Hex(0x202060));
         Hud.TextC($"<   TRANSMISSION : {(automatic ? "AUTOMATIC" : "MANUAL")}   >", W / 2f, 190, 10, Hex(0xFFE040));
         Hud.TextC($"BEST SCORE  {(long)best:N0}", W / 2f, 206, 10, Hex(0x9CFF80));
-        Hud.TextC("ARROWS DRIVE  -  SPACE GEAR  -  P PAUSE  -  M MUTE  -  F FULLSCREEN", W / 2f, H - 14, 10, Hex(0xD0D0E0));
+        Hud.TextC("ARROWS DRIVE  -  SPACE GEAR  -  P PAUSE  -  O OPTIONS  -  M MUTE  -  F FULLSCREEN", W / 2f, H - 14, 10, Hex(0xD0D0E0));
     }
 
     void DrawRadio()
@@ -810,7 +885,7 @@ sealed class Game : IDisposable
     {
         Raylib.DrawRectangle(0, 0, W, H, Fade(Color.Black, 0.55f));
         Hud.Bold("PAUSE", W / 2f, 100, 30, Color.White, Hex(0x202060));
-        Hud.TextC("P / ESC  RESUME      Q  QUIT TO TITLE", W / 2f, 145, 10, Hex(0xD0D0E0));
+        Hud.TextC("P / ESC  RESUME      O  OPTIONS      Q  QUIT TO TITLE", W / 2f, 145, 10, Hex(0xD0D0E0));
     }
 
     void DrawResults()
@@ -883,6 +958,8 @@ sealed class Game : IDisposable
 
         Sim(2); Snap("00_title");
         state = State.Radio; Snap("01_radio");
+        state = State.Title; OpenOptions(); optionSel = 1; Snap("01_options");
+        options = false; audio.Music.Stop();  // sans CloseOptions : un test n'écrit pas les réglages
         StartRace(); Sim(1.2f); Snap("02_countdown");
         autopilot = true;
         autoSide = 1;

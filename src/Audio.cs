@@ -17,6 +17,7 @@ sealed class Audio : IDisposable
     // paramètres pilotés par le jeu
     public float Rpm, Throttle, Engine, Skid, Offroad;
     public float MasterVolume = 0.8f;
+    public float MusicVolume = 0.8f, SfxVolume = 0.8f;
     public bool Muted;
     public readonly Music Music = new();
 
@@ -68,7 +69,7 @@ sealed class Audio : IDisposable
         float master = Muted ? 0 : MasterVolume;
         for (int i = 0; i < Block; i++)
         {
-            float s = EngineSample() + Effects() + Music.Next() * 0.5f;
+            float s = (EngineSample() + Effects()) * SfxVolume + Music.Next() * 0.5f * MusicVolume;
             s = MathF.Tanh(s * master * 1.2f);
             buf[i] = (short)(s * 30000);
         }
