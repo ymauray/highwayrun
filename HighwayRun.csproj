@@ -25,4 +25,9 @@
     <PackageReference Include="Raylib-cs" Version="8.1.0" />
   </ItemGroup>
 
+  <!-- Police embarquée dans le binaire (SIL Open Font License, voir assets/fonts/OFL.txt) -->
+  <ItemGroup>
+    <EmbeddedResource Include="assets/fonts/RussoOne-Regular.ttf" LogicalName="RussoOne.ttf" />
+  </ItemGroup>
+
 </Project>

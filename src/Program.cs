@@ -13,6 +13,7 @@ Raylib.SetTargetFPS(60);
 if (shots == null) Raylib.InitAudioDevice();
 Rlgl.DisableBackfaceCulling();
 
+Fonts.Load();
 Art.Load();
 Themes.Init();
 Backdrops.Load();
@@ -25,5 +26,6 @@ using (var game = new Game())
             game.Frame(Raylib.GetFrameTime());
 }
 
+Fonts.Unload();
 if (Raylib.IsAudioDeviceReady()) Raylib.CloseAudioDevice();
 Raylib.CloseWindow();

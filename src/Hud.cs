@@ -6,15 +6,17 @@ namespace HighwayRun;
 /// <summary>Texte avec la police bitmap intégrée de raylib et carte du parcours.</summary>
 static class Hud
 {
-    static Font Font => Raylib.GetFontDefault();
+    // police rastérisée à la résolution réelle : le texte reste net malgré l'agrandissement de la caméra
+    static Font Font(int size) => Fonts.Get(size * Cfg.ArtScale);
 
-    public static float Measure(string s, int size) => Raylib.MeasureTextEx(Font, s, size, size / 10f).X;
+    public static float Measure(string s, int size) => Raylib.MeasureTextEx(Font(size), s, size, Fonts.Spacing(size)).X;
 
     public static void Text(string s, float x, float y, int size, Color c, bool shadow = true)
     {
-        float sp = size / 10f;
-        if (shadow) Raylib.DrawTextEx(Font, s, new Vector2(MathF.Round(x) + size / 10, MathF.Round(y) + size / 10), size, sp, U.Fade(Color.Black, c.A / 255f * 0.7f));
-        Raylib.DrawTextEx(Font, s, new Vector2(MathF.Round(x), MathF.Round(y)), size, sp, c);
+        var font = Font(size);
+        float sp = Fonts.Spacing(size), off = MathF.Max(1, size / 10f);
+        if (shadow) Raylib.DrawTextEx(font, s, new Vector2(x + off, y + off), size, sp, U.Fade(Color.Black, c.A / 255f * 0.7f));
+        Raylib.DrawTextEx(font, s, new Vector2(x, y), size, sp, c);
     }
 
     public static void TextC(string s, float cx, float y, int size, Color c, bool shadow = true) => Text(s, cx - Measure(s, size) / 2, y, size, c, shadow);
@@ -24,10 +26,14 @@ static class Hud
     public static void Bold(string s, float cx, float y, int size, Color fill, Color outline)
     {
         float x = cx - Measure(s, size) / 2;
-        int o = Math.Max(1, size / 10);
-        for (int dx = -o; dx <= o; dx += o)
-            for (int dy = -o; dy <= o; dy += o)
-                if (dx != 0 || dy != 0) Text(s, x + dx, y + dy, size, outline, false);
+        // contour arrondi : copies décalées sur un cercle, puis ombre portée et remplissage
+        float o = MathF.Max(1, size / 14f);
+        Text(s, x + o * 1.4f, y + o * 1.4f, size, U.Fade(Color.Black, 0.6f), false);
+        for (int k = 0; k < 12; k++)
+        {
+            float a = k * MathF.Tau / 12;
+            Text(s, x + MathF.Cos(a) * o, y + MathF.Sin(a) * o, size, outline, false);
+        }
         Text(s, x, y, size, fill, false);
     }
 

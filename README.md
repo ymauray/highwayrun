@@ -2,7 +2,9 @@
 
 Recréation d'un jeu de course arcade des années 80 (voir [CONCEPT.md](CONCEPT.md)) en .NET 10, avec
 [raylib-cs](https://github.com/ChrisDill/Raylib-cs). Tout est généré au démarrage — sprites, décors,
-musiques et bruitages : le dépôt ne contient aucun fichier graphique ou sonore.
+musiques et bruitages : le dépôt ne contient aucun fichier graphique ou sonore. Seule exception, la police
+[Russo One](https://fonts.google.com/specimen/Russo+One) (SIL Open Font License, voir
+`assets/fonts/OFL.txt`), embarquée dans le binaire.
 
 ## Jouer
 

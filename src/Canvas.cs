@@ -115,8 +115,9 @@ sealed class Canvas(int w, int h, int s = Cfg.ArtScale)
 
     public void TextCentered(string s, float cx, int y, int size, Color c)
     {
-        int w = Raylib.MeasureText(s, size * S);
-        texts.Add((s, (int)(cx * S - w / 2f), y * S, size * S, c));
+        int px = size * S;
+        float w = Raylib.MeasureTextEx(Fonts.Get(px), s, px, Fonts.Spacing(px)).X;
+        texts.Add((s, (int)(cx * S - w / 2f), y * S, px, c));
     }
 
     /// <summary>Crée la texture et son masque (silhouette blanche utilisée pour le brouillard).</summary>
@@ -124,7 +125,7 @@ sealed class Canvas(int w, int h, int s = Cfg.ArtScale)
     {
         Image img = Raylib.GenImageColor(W, H, Color.Blank);
         fixed (Color* p = Px) Buffer.MemoryCopy(p, img.Data, (long)W * H * 4, (long)W * H * 4);
-        foreach (var t in texts) Raylib.ImageDrawText(ref img, t.text, t.x, t.y, t.size, t.color);
+        foreach (var t in texts) Raylib.ImageDrawTextEx(ref img, Fonts.Get(t.size), t.text, new Vector2(t.x, t.y), t.size, Fonts.Spacing(t.size), t.color);
         var tex = Raylib.LoadTextureFromImage(img);
 
         var data = (Color*)img.Data;
