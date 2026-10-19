@@ -5,6 +5,8 @@ static class Cfg
 {
     // Résolution interne (rendu pixelisé, puis mise à l'échelle dans la fenêtre)
     public const int Width = 480, Height = 270;
+    // Finesse des graphismes : pixels réels par pixel logique (rendu interne et sprites)
+    public const int ArtScale = 2;
 
     public const float SegmentLength = 200f;
     public const float RoadWidth = 1100f;          // demi-largeur de la route

@@ -22,25 +22,33 @@ static class Backdrops
         }
     }
 
+    const int S = Cfg.ArtScale;
+
+    /// <summary>Hauteurs (en unités logiques) pour chaque colonne de pixels réels.</summary>
     static float[] Ridge(Random rng, float baseH, params (int k, float amp)[] harm)
     {
         var phases = harm.Select(_ => (float)rng.NextDouble() * MathF.Tau).ToArray();
-        var h = new float[LayerW];
-        for (int x = 0; x < LayerW; x++)
+        var h = new float[LayerW * S];
+        for (int px = 0; px < h.Length; px++)
         {
-            float v = baseH;
+            float x = px / (float)S, v = baseH;
             for (int i = 0; i < harm.Length; i++) v += harm[i].amp * MathF.Sin(MathF.Tau * harm[i].k * x / LayerW + phases[i]);
-            h[x] = v;
+            h[px] = v;
         }
         return h;
     }
 
+    /// <summary>Hauteur à la colonne logique x.</summary>
+    static float At(float[] h, int x) => h[(x * S % h.Length + h.Length) % h.Length];
+    static bool Rising(float[] h, int x) => At(h, x + 1) > At(h, x);
+
+    /// <summary>Remplit sous la silhouette. color reçoit des coordonnées logiques et la profondeur sous la crête.</summary>
     static void Fill(Canvas c, float[] h, Func<int, int, float, Color> color)
     {
-        for (int x = 0; x < c.W; x++)
+        for (int px = 0; px < c.W; px++)
         {
-            int top = (int)MathF.Round(c.H - Math.Clamp(h[x], 0, c.H));
-            for (int y = Math.Max(0, top); y < c.H; y++) c.Plot(x, y, color(x, y, y - top));
+            int top = (int)MathF.Round(c.H - Math.Clamp(h[px] * S, 0, c.H));
+            for (int py = Math.Max(0, top); py < c.H; py++) c.Plot(px, py, color(px / S, py / S, (py - top) / (float)S));
         }
     }
 
@@ -68,7 +76,7 @@ static class Backdrops
             case Backdrop.Dunes:
             {
                 var h = Ridge(rng, 26, (2, 12), (5, 6), (9, 2));
-                Fill(c, h, (x, y, d) => h[(x + 1) % LayerW] > h[x] ? farHi : far);
+                Fill(c, h, (x, y, d) => Rising(h, x) ? farHi : far);
                 break;
             }
             case Backdrop.Snowy:
@@ -76,13 +84,13 @@ static class Backdrops
             {
                 var h = Peaks(rng, 34, 46);
                 float max = h.Max();
-                Fill(c, h, (x, y, d) => (c.H - y) > max - 22 + (x * 7 % 5) ? Hex(0xF4F8FF) : d < 1 ? farHi : far);
+                Fill(c, h, (x, y, d) => (c.LH - y) > max - 22 + (x * 7 % 5) ? Hex(0xF4F8FF) : d < 1 ? farHi : far);
                 break;
             }
             case Backdrop.Mountains:
             {
                 var h = Peaks(rng, 30, 52);
-                Fill(c, h, (x, y, d) => h[(x + 1) % LayerW] > h[x] ? farHi : far);
+                Fill(c, h, (x, y, d) => Rising(h, x) ? farHi : far);
                 break;
             }
             default:
@@ -100,23 +108,24 @@ static class Backdrops
         int[] ks = [3, 5, 8, 13];
         float[] amps = [1f, 0.6f, 0.35f, 0.2f];
         var ph = ks.Select(_ => (float)rng.NextDouble() * MathF.Tau).ToArray();
-        var h = new float[LayerW];
-        for (int x = 0; x < LayerW; x++)
+        var h = new float[LayerW * S];
+        for (int px = 0; px < h.Length; px++)
         {
-            float v = 0;
+            float x = px / (float)S, v = 0;
             for (int i = 0; i < ks.Length; i++) v += amps[i] * (1 - MathF.Abs(MathF.Sin(MathF.PI * ks[i] * x / LayerW + ph[i])));
-            h[x] = baseH + (v - 1f) * amp * 0.75f;
+            h[px] = baseH + (v - 1f) * amp * 0.75f;
         }
         return h;
     }
 
     static void Water(Canvas c, StageTheme th, int height)
     {
-        for (int y = c.H - height; y < c.H; y++)
-            for (int x = 0; x < c.W; x++)
+        for (int py = c.H - height * S; py < c.H; py++)
+            for (int px = 0; px < c.W; px++)
             {
-                bool glint = ((x * 13 + y * 7) % 23 == 0) && y > c.H - height + 2;
-                c.Plot(x, y, glint ? Mix(th.Water, Color.White, 0.6f) : Mix(th.Water, th.SkyBottom, (c.H - y) / (float)height * 0.35f));
+                int x = px / S, y = py / S;
+                bool glint = ((x * 13 + y * 7) % 23 == 0) && y > c.LH - height + 2 && px % S == 0;
+                c.Plot(px, py, glint ? Mix(th.Water, Color.White, 0.6f) : Mix(th.Water, th.SkyBottom, (c.H - py) / (float)(height * S) * 0.35f));
             }
     }
 
@@ -130,7 +139,7 @@ static class Backdrops
             {
                 // dunes de sable sur une partie de l'horizon seulement : la mer reste visible
                 var gate = Ridge(rng, 0, (1, 1), (2, 0.5f));
-                var h = gate.Select((g, x) => g > 0.2f ? 6 + 10 * Smooth((g - 0.2f) * 3) + 3 * MathF.Sin(x * 0.05f) : 0).ToArray();
+                var h = gate.Select((g, px) => g > 0.2f ? 6 + 10 * Smooth((g - 0.2f) * 3) + 3 * MathF.Sin(px / (float)S * 0.05f) : 0).ToArray();
                 Fill(c, h, (x, y, d) => d < 1 ? hi : near);
                 break;
             }
@@ -175,7 +184,7 @@ static class Backdrops
                 Fill(c, h, (x, y, d) => (d < 4 && (x % 5 < 3)) ? dk : near);
                 for (int x = 0; x < LayerW; x += 4 + rng.Next(5))
                 {
-                    float top = NearH - h[x];
+                    float top = NearH - At(h, x);
                     c.Poly(dk, new(x, top - 7 - rng.Next(4)), new(x + 3, top + 1), new(x - 3, top + 1));
                 }
                 Water(c, th, 9);
@@ -191,7 +200,7 @@ static class Backdrops
             case Backdrop.Dunes:
             {
                 var h = Ridge(rng, 12, (3, 6), (7, 3));
-                Fill(c, h, (x, y, d) => h[(x + 1) % LayerW] > h[x] ? hi : near);
+                Fill(c, h, (x, y, d) => Rising(h, x) ? hi : near);
                 break;
             }
             case Backdrop.Snowy:
@@ -201,7 +210,7 @@ static class Backdrops
                 Fill(c, h, (x, y, d) => near);
                 for (int x = 0; x < LayerW; x += 3 + rng.Next(4))
                 {
-                    float top = NearH - h[x];
+                    float top = NearH - At(h, x);
                     float th2 = 6 + rng.Next(6);
                     c.Poly(dk, new(x, top - th2), new(x + 3, top + 2), new(x - 3, top + 2));
                 }
@@ -214,7 +223,7 @@ static class Backdrops
                 for (int x = 0; x < LayerW; x += 5 + rng.Next(9))
                 {
                     if (rng.Next(3) == 0) continue;
-                    float top = NearH - h[x];
+                    float top = NearH - At(h, x);
                     c.Ellipse(x, top, 3 + rng.Next(3), 3, dk);
                 }
                 break;

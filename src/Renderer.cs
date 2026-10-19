@@ -44,12 +44,16 @@ sealed class Renderer
         return v;
     }
 
+    /// <summary>Arrondi à la grille des pixels réels.</summary>
+    static float Snap(float v) => MathF.Round(v * Cfg.ArtScale) / Cfg.ArtScale;
+
     static void Layer(Texture2D tex, float offset, float y, Color tint)
     {
-        float x = -(U.Wrap(offset) * tex.Width);
+        float lw = tex.Width / (float)Cfg.ArtScale, lh = tex.Height / (float)Cfg.ArtScale;
+        float x = Snap(-(U.Wrap(offset) * lw));
         var src = new Rectangle(0, 0, tex.Width, tex.Height);
-        Raylib.DrawTextureRec(tex, src, new Vector2(MathF.Round(x), y), tint);
-        Raylib.DrawTextureRec(tex, src, new Vector2(MathF.Round(x + tex.Width), y), tint);
+        Raylib.DrawTexturePro(tex, src, new Rectangle(x, y, lw, lh), Vector2.Zero, 0, tint);
+        Raylib.DrawTexturePro(tex, src, new Rectangle(x + lw, y, lw, lh), Vector2.Zero, 0, tint);
     }
 
     // ------------------------------------------------------------------ route
@@ -179,10 +183,10 @@ sealed class Renderer
     {
         float w = d.WorldW * scale * W / 2f;
         float h = w * d.Tex.Height / d.Tex.Width;
-        float dx = MathF.Round(x + w * ox), dy = MathF.Round(y + h * oy);
+        float dx = Snap(x + w * ox), dy = Snap(y + h * oy);
         if (w < 0.8f || dx > W || dx + w < 0 || dy > H || dy + h < 0) return;
         var src = new Rectangle(0, 0, d.Tex.Width, d.Tex.Height);
-        var dst = new Rectangle(dx, dy, MathF.Round(w), MathF.Round(h));
+        var dst = new Rectangle(dx, dy, Snap(w), Snap(h));
         Raylib.DrawTexturePro(d.Tex, src, dst, Vector2.Zero, 0, U.Fade(Color.White, alpha));
         if (fog > 0.02f) Raylib.DrawTexturePro(d.Mask, src, dst, Vector2.Zero, 0, U.Fade(fogCol, fog * alpha));
     }

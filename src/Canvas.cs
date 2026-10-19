@@ -3,11 +3,14 @@ using Raylib_cs;
 
 namespace HighwayRun;
 
-/// <summary>Petite surface de dessin en mémoire pour générer les sprites pixel art au démarrage.</summary>
-sealed class Canvas(int w, int h)
+/// <summary>Petite surface de dessin en mémoire pour générer les sprites pixel art au démarrage.
+/// Les primitives prennent des coordonnées logiques ; la surface réelle compte S pixels par unité.</summary>
+sealed class Canvas(int w, int h, int s = Cfg.ArtScale)
 {
-    public readonly int W = w, H = h;
-    public readonly Color[] Px = new Color[w * h];
+    public readonly int S = s;
+    public readonly int LW = w, LH = h;          // taille logique
+    public readonly int W = w * s, H = h * s;    // taille réelle en pixels
+    public readonly Color[] Px = new Color[w * s * h * s];
     readonly List<(string text, int x, int y, int size, Color color)> texts = [];
 
     public void Plot(int x, int y, Color c)
@@ -21,13 +24,14 @@ sealed class Canvas(int w, int h)
 
     public void Rect(float x, float y, float w, float h, Color c)
     {
-        int x0 = (int)MathF.Round(x), y0 = (int)MathF.Round(y), x1 = (int)MathF.Round(x + w), y1 = (int)MathF.Round(y + h);
+        int x0 = (int)MathF.Round(x * S), y0 = (int)MathF.Round(y * S), x1 = (int)MathF.Round((x + w) * S), y1 = (int)MathF.Round((y + h) * S);
         for (int j = y0; j < y1; j++)
             for (int i = x0; i < x1; i++) Plot(i, j, c);
     }
 
     public void Ellipse(float cx, float cy, float rx, float ry, Color c)
     {
+        cx *= S; cy *= S; rx *= S; ry *= S;
         for (int j = (int)MathF.Floor(cy - ry); j <= (int)MathF.Ceiling(cy + ry); j++)
             for (int i = (int)MathF.Floor(cx - rx); i <= (int)MathF.Ceiling(cx + rx); i++)
             {
@@ -40,6 +44,7 @@ sealed class Canvas(int w, int h)
 
     public void EraseEllipse(float cx, float cy, float rx, float ry)
     {
+        cx *= S; cy *= S; rx *= S; ry *= S;
         for (int j = 0; j < H; j++)
             for (int i = 0; i < W; i++)
             {
@@ -50,6 +55,7 @@ sealed class Canvas(int w, int h)
 
     public void Poly(Color c, params Vector2[] pts)
     {
+        pts = pts.Select(p => p * S).ToArray();
         float minY = pts.Min(p => p.Y), maxY = pts.Max(p => p.Y);
         var xs = new List<float>();
         for (int j = (int)MathF.Floor(minY); j <= (int)MathF.Ceiling(maxY); j++)
@@ -70,9 +76,9 @@ sealed class Canvas(int w, int h)
 
     public void Line(float x0, float y0, float x1, float y1, float thick, Color c)
     {
-        float len = MathF.Max(MathF.Abs(x1 - x0), MathF.Abs(y1 - y0));
+        float len = MathF.Max(MathF.Abs(x1 - x0), MathF.Abs(y1 - y0)) * S;
         int n = Math.Max(1, (int)MathF.Ceiling(len * 2));
-        float r = MathF.Max(0.5f, thick / 2);
+        float r = MathF.Max(0.5f / S, thick / 2);
         for (int k = 0; k <= n; k++)
         {
             float t = k / (float)n;
@@ -80,14 +86,14 @@ sealed class Canvas(int w, int h)
         }
     }
 
-    /// <summary>Applique une transformation aux pixels opaques.</summary>
+    /// <summary>Applique une transformation aux pixels opaques (coordonnées logiques).</summary>
     public void Map(Func<int, int, Color, Color> f)
     {
         for (int j = 0; j < H; j++)
             for (int i = 0; i < W; i++)
             {
                 ref Color p = ref Px[j * W + i];
-                if (p.A > 0) p = f(i, j, p);
+                if (p.A > 0) p = f(i / S, j / S, p);
             }
     }
 
@@ -105,12 +111,12 @@ sealed class Canvas(int w, int h)
             }
     }
 
-    public void Text(string s, int x, int y, int size, Color c) => texts.Add((s, x, y, size, c));
+    public void Text(string s, int x, int y, int size, Color c) => texts.Add((s, x * S, y * S, size * S, c));
 
     public void TextCentered(string s, float cx, int y, int size, Color c)
     {
-        int w = Raylib.MeasureText(s, size);
-        texts.Add((s, (int)(cx - w / 2f), y, size, c));
+        int w = Raylib.MeasureText(s, size * S);
+        texts.Add((s, (int)(cx * S - w / 2f), y * S, size * S, c));
     }
 
     /// <summary>Crée la texture et son masque (silhouette blanche utilisée pour le brouillard).</summary>

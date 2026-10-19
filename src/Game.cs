@@ -62,7 +62,7 @@ sealed class Game : IDisposable
 
     public Game()
     {
-        target = Raylib.LoadRenderTexture(W, H);
+        target = Raylib.LoadRenderTexture(W * Cfg.ArtScale, H * Cfg.ArtScale);
         Raylib.SetTextureFilter(target.Texture, TextureFilter.Point);
         best = LoadBest();
         GoTitle();
@@ -136,7 +136,7 @@ sealed class Game : IDisposable
         state = State.Results;
         stateT = 0;
         paused = false;
-        if (score > best) { best = score; SaveBest(); }
+        if (score > best && !autopilot) { best = score; SaveBest(); }
     }
 
     void Banner(string a, string b, Color c, float t)
@@ -647,6 +647,8 @@ sealed class Game : IDisposable
     {
         Raylib.BeginTextureMode(target);
         Raylib.ClearBackground(Color.Black);
+        // tout est dessiné en coordonnées logiques 480×270, agrandies vers la résolution réelle
+        Raylib.BeginMode2D(new Camera2D(Vector2.Zero, Vector2.Zero, 0, Cfg.ArtScale));
         switch (state)
         {
             case State.Ending: ending!.Draw(renderer); break;
@@ -657,6 +659,7 @@ sealed class Game : IDisposable
                 break;
         }
         if (paused) DrawPause();
+        Raylib.EndMode2D();
         Raylib.EndTextureMode();
     }
 
@@ -667,7 +670,8 @@ sealed class Game : IDisposable
         float sw = Raylib.GetScreenWidth(), sh = Raylib.GetScreenHeight();
         float scale = MathF.Min(sw / W, sh / H);
         float dw = W * scale, dh = H * scale;
-        Raylib.DrawTexturePro(target.Texture, new Rectangle(0, 0, W, -H), new Rectangle((sw - dw) / 2, (sh - dh) / 2, dw, dh),
+        Raylib.DrawTexturePro(target.Texture, new Rectangle(0, 0, target.Texture.Width, -target.Texture.Height),
+                              new Rectangle((sw - dw) / 2, (sh - dh) / 2, dw, dh),
                               Vector2.Zero, 0, Color.White);
         Raylib.EndDrawing();
     }
@@ -705,11 +709,11 @@ sealed class Game : IDisposable
                 rot = MathF.Sin(t * 30) * 6 * (1 - t);
             }
         }
-        float w = def.Tex.Width, h = def.Tex.Height;
+        float w = def.Tex.Width / (float)Cfg.ArtScale, h = def.Tex.Height / (float)Cfg.ArtScale;
         float bounce = speed > 30 ? ((int)(globalT * 30) % 2) * (offroad ? 2 : 1) : 0;
         float x = MathF.Round(W / 2f), y = MathF.Round(H - 6 - h / 2 - bounce - lift);
         if (lift > 2) Raylib.DrawEllipse(W / 2, H - 8, 48 - lift * 0.3f, 4, Fade(Color.Black, 0.35f));
-        Raylib.DrawTexturePro(def.Tex, new Rectangle(0, 0, w, h), new Rectangle(x, y, w, h), new Vector2(w / 2, h / 2), rot, Color.White);
+        Raylib.DrawTexturePro(def.Tex, new Rectangle(0, 0, def.Tex.Width, def.Tex.Height), new Rectangle(x, y, w, h), new Vector2(w / 2, h / 2), rot, Color.White);
     }
 
     void DrawOverlay()
