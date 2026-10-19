@@ -48,6 +48,17 @@ Le binaire embarque le framework .NET et la bibliothèque native raylib :
 dotnet publish -c Release -r osx-arm64 -o publish/osx-arm64   # ou osx-x64, linux-x64, win-x64
 ```
 
+## Intégration continue et releases
+
+Tout passe par le workflow GitHub Actions [`build.yml`](.github/workflows/build.yml), sans outil externe :
+
+- à chaque push sur `main` et chaque pull request, il publie le binaire autonome pour `linux-x64`, `win-x64`,
+  `osx-arm64` et `osx-x64`, et le dépose comme artefact du run ;
+- sur un tag `vX.Y.Z` (par exemple `git tag v1.0.0 && git push origin v1.0.0`), il crée en plus la release
+  GitHub correspondante, avec les quatre archives et des notes générées à partir des PR.
+
+Le binaire n'est ni signé ni notarié : aucune étape de signature n'existe, ni dans la CI ni ailleurs.
+
 ## Organisation
 
 | Fichier | Rôle |
