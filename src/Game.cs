@@ -731,17 +731,17 @@ sealed class Game : IDisposable
         Hud.Text("TIME", 12, 6, 10, Hex(0xFFB020));
         int tl = (int)MathF.Ceiling(timeLeft);
         Color tc = timeLeft < 10 && state == State.Racing && (int)(globalT * 4) % 2 == 0 ? Hex(0xFF3030) : Hex(0xFFE040);
-        Hud.Text(tl.ToString(), 12, 16, 30, tc);
+        Hud.Mono(tl.ToString(), 12, 16, 30, tc);
 
         Hud.TextC("SCORE", W / 2f, 6, 10, Hex(0x60E0FF));
-        Hud.TextC(((long)score).ToString("N0"), W / 2f, 17, 20, Hex(0x9CFF80));
+        Hud.MonoC(((long)score).ToString("N0"), W / 2f, 17, 20, Hex(0x9CFF80));
 
         Hud.TextR("LAP", W - 12, 6, 10, Hex(0xFF80C0));
-        Hud.TextR(FormatLap(stageTime), W - 12, 17, 10, Color.White);
+        Hud.MonoR(FormatLap(stageTime), W - 12, 17, 10, Color.White);
         Hud.TextR($"STAGE {path.Count}", W - 12, 29, 10, Color.White);
 
         int kmh = (int)(speed / Cfg.MaxSpeed * Cfg.TopKmh);
-        Hud.TextR(kmh.ToString(), 76, H - 34, 30, Color.White);
+        Hud.MonoR(kmh.ToString(), 76, H - 34, 30, Color.White);
         Hud.Text("km/h", 80, H - 18, 10, Hex(0xFFE040));
         float rpm = audio.Rpm;
         for (int i = 0; i < 20; i++)

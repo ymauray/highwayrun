@@ -22,6 +22,46 @@ static class Hud
     public static void TextC(string s, float cx, float y, int size, Color c, bool shadow = true) => Text(s, cx - Measure(s, size) / 2, y, size, c, shadow);
     public static void TextR(string s, float rx, float y, int size, Color c, bool shadow = true) => Text(s, rx - Measure(s, size), y, size, c, shadow);
 
+    // ------------------------------------------------------------------ compteurs à chasse fixe
+    // Chaque chiffre occupe une case de la largeur du chiffre le plus large : un compteur qui défile
+    // ne bouge pas quand un 1 (étroit) remplace un 0.
+
+    static readonly Dictionary<int, float> digitWidth = [];
+
+    static float DigitWidth(int size)
+    {
+        if (!digitWidth.TryGetValue(size, out float w))
+        {
+            for (char c = '0'; c <= '9'; c++) w = MathF.Max(w, Measure(c.ToString(), size));
+            digitWidth[size] = w;
+        }
+        return w;
+    }
+
+    static float CellWidth(char c, int size) => char.IsDigit(c) ? DigitWidth(size) : Measure(c.ToString(), size);
+
+    public static float MeasureMono(string s, int size)
+    {
+        float w = 0;
+        foreach (char c in s) w += CellWidth(c, size);
+        return w + Fonts.Spacing(size) * Math.Max(0, s.Length - 1);
+    }
+
+    public static void Mono(string s, float x, float y, int size, Color col, bool shadow = true)
+    {
+        float sp = Fonts.Spacing(size);
+        foreach (char c in s)
+        {
+            string g = c.ToString();
+            float cell = CellWidth(c, size);
+            Text(g, x + (cell - Measure(g, size)) / 2, y, size, col, shadow);
+            x += cell + sp;
+        }
+    }
+
+    public static void MonoC(string s, float cx, float y, int size, Color c, bool shadow = true) => Mono(s, cx - MeasureMono(s, size) / 2, y, size, c, shadow);
+    public static void MonoR(string s, float rx, float y, int size, Color c, bool shadow = true) => Mono(s, rx - MeasureMono(s, size), y, size, c, shadow);
+
     /// <summary>Texte « arcade » : contour sombre épais puis remplissage.</summary>
     public static void Bold(string s, float cx, float y, int size, Color fill, Color outline)
     {
