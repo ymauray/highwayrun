@@ -1,5 +1,9 @@
 # HighwayRun
 
+[![Build](https://github.com/ymauray/highwayrun/actions/workflows/build.yml/badge.svg)](https://github.com/ymauray/highwayrun/actions/workflows/build.yml)
+
+![Écran d'accueil de HighwayRun](docs/screenshot-title.png)
+
 Recréation d'un jeu de course arcade des années 80 (voir [CONCEPT.md](CONCEPT.md)) en .NET 10, avec
 [raylib-cs](https://github.com/ChrisDill/Raylib-cs). Tout est généré au démarrage — sprites, décors,
 musiques et bruitages : le dépôt ne contient aucun fichier graphique ou sonore. Seule exception, la police
@@ -7,6 +11,16 @@ musiques et bruitages : le dépôt ne contient aucun fichier graphique ou sonore
 `assets/fonts/OFL.txt`), embarquée dans le binaire.
 
 ## Jouer
+
+Les binaires pour Windows, Linux et macOS (Apple Silicon et Intel) sont attachés à chaque
+[release](https://github.com/ymauray/highwayrun/releases) ; ceux de la branche `main` sont disponibles
+comme artefacts du workflow [Build](https://github.com/ymauray/highwayrun/actions/workflows/build.yml).
+Chaque binaire est un fichier unique qui embarque tout ce qu'il faut : aucun runtime .NET à installer.
+
+Sur macOS, le binaire n'est pas signé : après l'avoir téléchargé, retirer l'attribut de quarantaine avec
+`xattr -d com.apple.quarantine highwayrun`.
+
+Depuis les sources (SDK .NET 10) :
 
 ```sh
 dotnet run

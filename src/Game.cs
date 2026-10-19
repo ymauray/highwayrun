@@ -926,6 +926,7 @@ sealed class Game : IDisposable
     public void RunShots(string dir)
     {
         Directory.CreateDirectory(dir);
+        best = 0;  // captures reproductibles, indépendantes du meilleur score enregistré
         void Snap(string name)
         {
             RenderScene();
