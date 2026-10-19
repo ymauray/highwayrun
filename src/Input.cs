@@ -43,6 +43,8 @@ static class Input
     public static bool Left => Pressed(KeyboardKey.Left) || PadPressed(GamepadButton.LeftFaceLeft);
     public static bool Right => Pressed(KeyboardKey.Right) || PadPressed(GamepadButton.LeftFaceRight);
     public static bool Quit => Pressed(KeyboardKey.Q);
-    public static bool Fullscreen => Pressed(KeyboardKey.F11) || (Pressed(KeyboardKey.Enter) && (Key(KeyboardKey.LeftAlt) || Key(KeyboardKey.RightAlt)));
+    // F11 est pris par macOS (afficher le bureau) : F, ⌃⌘F et ⌥Entrée marchent partout
+    public static bool Fullscreen => Pressed(KeyboardKey.F) || Pressed(KeyboardKey.F11)
+        || (Pressed(KeyboardKey.Enter) && (Key(KeyboardKey.LeftAlt) || Key(KeyboardKey.RightAlt)));
     public static bool Mute => Pressed(KeyboardKey.M);
 }

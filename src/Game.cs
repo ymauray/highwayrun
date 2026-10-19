@@ -778,7 +778,7 @@ sealed class Game : IDisposable
         if ((int)(globalT * 2) % 2 == 0) Hud.Bold("PRESS ENTER", W / 2f, 160, 20, Hex(0xFFFFFF), Hex(0x202060));
         Hud.TextC($"<   TRANSMISSION : {(automatic ? "AUTOMATIC" : "MANUAL")}   >", W / 2f, 190, 10, Hex(0xFFE040));
         Hud.TextC($"BEST SCORE  {(long)best:N0}", W / 2f, 206, 10, Hex(0x9CFF80));
-        Hud.TextC("ARROWS DRIVE  -  SPACE GEAR  -  P PAUSE  -  M MUTE  -  F11 FULLSCREEN", W / 2f, H - 14, 10, Hex(0xD0D0E0));
+        Hud.TextC("ARROWS DRIVE  -  SPACE GEAR  -  P PAUSE  -  M MUTE  -  F FULLSCREEN", W / 2f, H - 14, 10, Hex(0xD0D0E0));
     }
 
     void DrawRadio()

@@ -18,7 +18,7 @@ dotnet run
 | Tourner | ← / → | stick gauche, croix |
 | Changer de vitesse (boîte manuelle) | Espace | RB ou B |
 | Pause / quitter vers le titre | P ou Échap / Q | Start |
-| Plein écran / couper le son | F11 / M | |
+| Plein écran / couper le son | F (ou F11, ⌥ Entrée) / M | |
 
 Sur l'écran titre, ← → choisit la boîte automatique ou manuelle ; on choisit ensuite la musique à la radio.
 
