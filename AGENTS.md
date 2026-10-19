@@ -38,3 +38,26 @@ Il n'y a pas de tests automatisés. Pour vérifier un changement visuel ou de ga
   RuntimeIdentifier est donné.
 - Toute modification passe par une PR vers `main`, mergée en squash. Les quatre checks `Build (...)` doivent
   passer.
+
+## Releases
+
+Pousser un tag `vX.Y.Z` sur `main` : le workflow `build.yml` crée la release GitHub avec les quatre archives.
+Les pushes et les PR ne produisent que des artefacts de run.
+
+## Données du joueur
+
+Le record (`best.txt`) et les volumes (`settings.txt`) sont stockés dans
+`Environment.SpecialFolder.ApplicationData/HighwayRun/`, soit `~/Library/Application Support/HighwayRun/`
+sur macOS. Ce sont les vraies données du joueur : ne jamais les supprimer ni les réécrire pendant un test.
+Le mode `--shots` ne doit écrire ni l'un ni l'autre.
+
+## Pièges connus
+
+- `Renderer.DrawSegment` dessine la bande d'herbe aux bornes flottantes exactes. Si on les arrondit, au loin,
+  l'herbe efface l'asphalte des segments suivants.
+- Une fois la fourche choisie, `Segment.Nearest` ne renvoie plus que la route choisie. Le maintien latéral et
+  le pilote automatique s'appuient dessus, pour qu'on ne roule pas sur la branche abandonnée.
+- La position est bornée à `track.Length - Seg * 30` : avec une grande `DrawDistance`, une borne plus courte
+  bloquerait la voiture avant la fourche.
+- Les rectangles source des sprites prennent la taille réelle de la texture (`ArtScale` fois la taille logique),
+  jamais la taille logique.
